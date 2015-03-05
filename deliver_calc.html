@@ -1,0 +1,409 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+<meta charset="utf-8">
+<title>Доставка изделий в Санкт-Петербурге и Ленинградской области</title>
+
+</head>
+<body>
+
+<div style="text-align: justify;">
+<script src="http://api-maps.yandex.ru/2.0.38/?load=package.standard,package.geoObjects,package.geoQuery,package.route&amp;lang=ru-RU" type="text/javascript"></script>
+ 
+ Для расчета стоимости доставки изделий введите адрес доставки в строке поиска или установите точку адреса с кликом по карте.</div>
+ 
+<div>    
+  <div id="YMapsID" style="width: 610px; height: 400px;"></div>
+  <div id="cost"></div>
+  <script>
+ 
+var TYPE_TRANSPORT = 46,
+    MINIMUM_COST = 10;
+var LASTKM = 0,
+    LASTPRICE = 0,
+    LASTADRESS = '',
+    STARTADRESS ='',
+    DISTANCE_FROM_TOWN = 0;
+
+var TYPE_DELIVERY_COST = 1;
+
+var price = [
+    [500], // Стоиоимсть внутри зоны 1
+    [1000], // Стоиоимсть внутри зоны 2
+    [1500], // Стоиоимсть внутри зоны 3
+    [2500], // Стоиоимсть внутри зоны 4
+    [35]  // Стоиоимсть 1 км в зоне 5
+]; 
+
+
+ymaps.ready(function () {
+        var center = [59.883814, 30.390249];
+        var map = new ymaps.Map('YMapsID', {
+            center: center,
+            zoom: 10,
+            type: 'yandex#map',
+            behaviors: ['scrollZoom', 'drag']
+        });
+
+        
+// Zone N1
+var Zona1 = new ymaps.Polygon( [ 
+        [ [ 59.8539, 30.3635 ], [ 59.8590, 30.3923 ], [ 59.8657, 30.4157 ], [ 59.8731, 30.4376 ], [ 59.8804, 30.4266 ], [ 59.8880, 30.4218 ], [ 59.9016, 30.4009 ], [ 59.9059, 30.3789 ], [ 59.8976, 30.3693 ], [ 59.8966, 30.3552 ], [ 59.8943, 30.3422 ], [ 59.8907, 30.3453 ], [ 59.8857, 30.3442 ], [ 59.8726, 30.3535 ], [ 59.8539, 30.3635 ] ] ], {
+    // Описываем свойства геообъекта.
+    // Содержимое балуна.
+    hintContent: "Зона 1"
+    }, {
+    // Задаем опции геообъекта.
+    // Цвет заливки.
+    fillColor: '#CF8B8B',
+    // Цвет обводки.
+    strokeColor: '4B4949',
+    // Общая прозрачность (как для заливки, так и для обводки).
+    opacity: 0.4,
+    // Ширина обводки.
+    strokeWidth: 2,
+    // Будет прозрачная
+    interactivityModel: 'default#transparent'
+});
+
+
+// Zone N2
+var Zona2 = new ymaps.Polygon( 
+        [ [ [ 59.8544, 30.5044 ], [ 59.8530, 30.4783 ], [ 59.8481, 30.4591 ], [ 59.8267, 30.4385 ], [ 59.8163, 30.4000 ], [ 59.8143, 30.3616 ], [ 59.8143, 30.3492 ], [ 59.8087, 30.3327 ], [ 59.8108, 30.3176 ], [ 59.8316, 30.2819 ], [ 59.8329, 30.2654 ], [ 59.8219, 30.2229 ], [ 59.8233, 30.1720 ], [ 59.8454, 30.1720 ], [ 59.8564, 30.1583 ], [ 59.8647, 30.1432 ], [ 59.8889, 30.1679 ], [ 59.9041, 30.1940 ], [ 59.9220, 30.1954 ], [ 59.9454, 30.1720 ], [ 59.9571, 30.1734 ], [ 59.9840, 30.1844 ], [ 59.9977, 30.1830 ], [ 60.0046, 30.1844 ], [ 60.0204, 30.2132 ], [ 60.0294, 30.2338 ], [ 60.0404, 30.2723 ], [ 60.0651, 30.2984 ], [ 60.0699, 30.3080 ], [ 60.0445, 30.4343 ], [ 60.0390, 30.4412 ], [ 60.0280, 30.4467 ], [ 60.0177, 30.4591 ], [ 60.0108, 30.4728 ], [ 59.9936, 30.4797 ], [ 59.9840, 30.4934 ], [ 59.9812, 30.5209 ], [ 59.9757, 30.5401 ], [ 59.9640, 30.5552 ], [ 59.9544, 30.5483 ], [ 59.9447, 30.5415 ], [ 59.9330, 30.5387 ], [ 59.9213, 30.5277 ], [ 59.9041, 30.5264 ], [ 59.8951, 30.5250 ], [ 59.8799, 30.5291 ], [ 59.8702, 30.5332 ], [ 59.8592, 30.5236 ], [ 59.8544, 30.5044 ] ],
+        [ [ 59.8539, 30.3635 ], [ 59.8590, 30.3923 ], [ 59.8657, 30.4157 ], [ 59.8731, 30.4376 ], [ 59.8804, 30.4266 ], [ 59.8880, 30.4218 ], [ 59.9016, 30.4009 ], [ 59.9059, 30.3789 ], [ 59.8976, 30.3693 ], [ 59.8966, 30.3552 ], [ 59.8943, 30.3422 ], [ 59.8907, 30.3453 ], [ 59.8857, 30.3442 ], [ 59.8726, 30.3535 ], [ 59.8539, 30.3635 ] ]
+        ],
+    {
+    // Описываем свойства геообъекта.
+    // Содержимое балуна.
+    hintContent: "Зона 2"
+    }, {
+    // Задаем опции геообъекта.
+    // Цвет заливки.
+    fillColor: '#CFB48B',
+    // Цвет обводки.
+    strokeColor: '#8B8989',
+    // Общая прозрачность (как для заливки, так и для обводки).
+    opacity: 0.4,
+    // Ширина обводки.
+    strokeWidth: 2,
+    // Будет прозрачная
+    interactivityModel: 'default#transparent'
+});
+
+// Zone N3
+var Zona3 = new ymaps.Polygon( 
+        [ [ [ 60.0204, 29.7326 ], [ 60.0204, 29.7820 ], [ 60.0259, 29.8425 ], [ 60.0355, 29.9303 ], [ 60.0397, 29.9743 ], [ 60.0534, 29.9798 ], [ 60.0685, 29.9715 ], [ 60.0905, 29.9578 ], [ 60.1001, 29.9770 ], [ 60.1179, 29.9688 ], [ 60.1398, 29.9880 ], [ 60.1521, 29.9715 ], [ 60.1371, 30.0594 ], [ 60.1371, 30.0759 ], [ 60.1247, 30.1308 ], [ 60.1302, 30.1473 ], [ 60.1193, 30.1858 ], [ 60.1152, 30.2407 ], [ 60.1069, 30.2462 ], [ 60.1124, 30.2682 ], [ 60.1261, 30.2599 ], [ 60.1412, 30.2599 ], [ 60.1562, 30.2792 ], [ 60.1631, 30.3121 ], [ 60.1795, 30.3561 ], [ 60.1781, 30.3890 ], [ 60.1617, 30.4440 ], [ 60.1562, 30.4687 ], [ 60.1480, 30.4824 ], [ 60.1494, 30.5071 ], [ 60.1426, 30.5319 ], [ 60.1302, 30.5209 ], [ 60.0369, 30.6390 ], [ 60.0246, 30.6500 ], [ 60.0122, 30.6664 ], [ 59.9915, 30.6609 ], [ 59.9723, 30.6500 ], [ 59.9558, 30.6609 ], [ 59.9337, 30.6609 ], [ 59.8992, 30.6774 ], [ 59.8840, 30.6939 ], [ 59.8274, 30.7488 ], [ 59.7956, 30.7626 ], [ 59.7610, 30.7516 ], [ 59.7416, 30.6994 ], [ 59.7208, 30.6033 ], [ 59.7013, 30.5923 ], [ 59.6930, 30.5511 ], [ 59.6874, 30.4302 ], [ 59.6916, 30.2517 ], [ 59.7138, 30.0759 ], [ 59.7277, 30.0567 ], [ 59.7707, 30.0814 ], [ 59.8025, 30.1281 ], [ 59.8136, 30.1006 ], [ 59.8108, 30.0073 ], [ 59.8205, 29.9770 ], [ 59.8080, 29.9276 ], [ 59.8122, 29.8452 ], [ 59.8260, 29.8177 ], [ 59.8578, 29.8013 ], [ 59.8689, 29.7683 ], [ 59.8716, 29.7271 ], [ 59.8868, 29.6667 ], [ 59.9130, 29.6557 ], [ 59.9296, 29.6694 ], [ 59.9681, 29.6804 ], [ 60.0026, 29.6969 ], [ 60.0204, 29.7326 ] ] ,
+        [ [ 59.8544, 30.5044 ], [ 59.8530, 30.4783 ], [ 59.8481, 30.4591 ], [ 59.8267, 30.4385 ], [ 59.8163, 30.4000 ], [ 59.8143, 30.3616 ], [ 59.8143, 30.3492 ], [ 59.8087, 30.3327 ], [ 59.8108, 30.3176 ], [ 59.8316, 30.2819 ], [ 59.8329, 30.2654 ], [ 59.8219, 30.2229 ], [ 59.8233, 30.1720 ], [ 59.8454, 30.1720 ], [ 59.8564, 30.1583 ], [ 59.8647, 30.1432 ], [ 59.8889, 30.1679 ], [ 59.9041, 30.1940 ], [ 59.9220, 30.1954 ], [ 59.9454, 30.1720 ], [ 59.9571, 30.1734 ], [ 59.9840, 30.1844 ], [ 59.9977, 30.1830 ], [ 60.0046, 30.1844 ], [ 60.0204, 30.2132 ], [ 60.0294, 30.2338 ], [ 60.0404, 30.2723 ], [ 60.0651, 30.2984 ], [ 60.0699, 30.3080 ], [ 60.0445, 30.4343 ], [ 60.0390, 30.4412 ], [ 60.0280, 30.4467 ], [ 60.0177, 30.4591 ], [ 60.0108, 30.4728 ], [ 59.9936, 30.4797 ], [ 59.9840, 30.4934 ], [ 59.9812, 30.5209 ], [ 59.9757, 30.5401 ], [ 59.9640, 30.5552 ], [ 59.9544, 30.5483 ], [ 59.9447, 30.5415 ], [ 59.9330, 30.5387 ], [ 59.9213, 30.5277 ], [ 59.9041, 30.5264 ], [ 59.8951, 30.5250 ], [ 59.8799, 30.5291 ], [ 59.8702, 30.5332 ], [ 59.8592, 30.5236 ], [ 59.8544, 30.5044 ] ] ],
+    {
+    // Описываем свойства геообъекта.
+    // Содержимое балуна.
+    hintContent: "Зона 3"
+    }, {
+    // Задаем опции геообъекта.
+    // Цвет заливки.
+    fillColor: '#8BCF8E',
+    // Цвет обводки.
+    strokeColor: '#8B8989',
+    // Общая прозрачность (как для заливки, так и для обводки).
+    opacity: 0.4,
+    // Ширина обводки.
+    strokeWidth: 2,
+    // Будет прозрачная
+    interactivityModel: 'default#transparent'
+});
+
+// Zone N4
+var cityPolygon = new ymaps.Polygon( [
+        [ [ 59.6812, 29.6475 ], [ 59.7232, 29.6063 ], [ 59.7469, 29.5774 ], [ 59.7602, 29.5548 ], [ 59.7931, 29.5599 ], [ 59.8317, 29.5405 ], [ 59.8896, 29.5336 ], [ 59.9282, 29.5575 ], [ 59.9516, 29.5640 ], [ 60.1918, 29.6749 ], [ 60.2028, 29.6941 ], [ 60.2055, 29.7134 ], [ 60.2151, 29.7353 ], [ 60.2287, 29.7656 ], [ 60.2424, 29.7848 ], [ 60.2642, 29.8013 ], [ 60.2833, 29.7930 ], [ 60.2942, 29.8095 ], [ 60.2997, 29.8452 ], [ 60.3337, 29.8809 ], [ 60.3759, 29.9413 ], [ 60.3827, 29.9853 ], [ 60.3759, 30.0045 ], [ 60.3746, 30.0485 ], [ 60.3800, 30.0649 ], [ 60.3787, 30.1583 ], [ 60.3814, 30.1775 ], [ 60.3746, 30.2105 ], [ 60.3854, 30.2380 ], [ 60.3759, 30.2654 ], [ 60.3664, 30.2902 ], [ 60.3678, 30.3149 ], [ 60.3732, 30.3423 ], [ 60.3528, 30.3890 ], [ 60.3337, 30.4247 ], [ 60.3269, 30.4549 ], [ 60.3392, 30.4824 ], [ 60.3487, 30.4989 ], [ 60.3419, 30.5291 ], [ 60.3297, 30.5593 ], [ 60.3174, 30.5676 ], [ 60.3079, 30.6142 ], [ 60.3051, 30.6719 ], [ 60.3011, 30.7296 ], [ 60.3024, 30.7790 ], [ 60.3160, 30.8065 ], [ 60.3120, 30.8312 ], [ 60.2901, 30.8532 ], [ 60.2601, 30.8724 ], [ 60.2519, 30.8669 ], [ 60.2260, 30.8889 ], [ 60.2137, 30.9026 ], [ 60.2000, 30.9081 ], [ 60.1877, 30.9274 ], [ 60.1604, 30.9274 ], [ 60.1412, 30.9603 ], [ 60.1261, 30.9768 ], [ 60.1069, 30.9658 ], [ 60.0864, 30.9548 ], [ 60.0740, 30.9466 ], [ 60.0644, 30.9631 ], [ 60.0644, 31.0015 ], [ 60.0671, 31.0317 ], [ 60.0562, 31.0400 ], [ 60.0342, 31.0455 ], [ 60.0122, 31.0427 ], [ 59.9957, 31.0619 ], [ 59.9695, 31.0510 ], [ 59.9530, 31.0152 ], [ 59.9420, 30.9878 ], [ 59.9268, 30.9878 ], [ 59.9199, 30.9686 ], [ 59.9130, 30.9878 ], [ 59.8758, 30.9740 ], [ 59.8606, 30.9988 ], [ 59.8426, 31.0592 ], [ 59.8288, 31.0867 ], [ 59.7928, 31.1169 ], [ 59.7568, 31.1004 ], [ 59.7346, 31.0784 ], [ 59.6958, 30.9988 ], [ 59.6736, 30.9383 ], [ 59.6652, 30.8889 ], [ 59.6402, 30.8395 ], [ 59.6263, 30.8147 ], [ 59.6249, 30.7928 ], [ 59.6138, 30.7845 ], [ 59.6012, 30.7626 ], [ 59.5664, 30.6829 ], [ 59.5413, 30.5978 ], [ 59.5371, 30.5428 ], [ 59.5064, 30.4110 ], [ 59.5022, 30.2792 ], [ 59.5050, 30.2023 ], [ 59.5120, 30.1116 ], [ 59.5204, 30.0155 ], [ 59.5204, 29.9606 ], [ 59.5427, 29.8837 ], [ 59.5483, 29.8342 ], [ 59.5748, 29.7546 ], [ 59.6082, 29.6639 ], [ 59.6812, 29.6475 ] ],
+        [ [ 60.0204, 29.7326 ], [ 60.0204, 29.7820 ], [ 60.0259, 29.8425 ], [ 60.0355, 29.9303 ], [ 60.0397, 29.9743 ], [ 60.0534, 29.9798 ], [ 60.0685, 29.9715 ], [ 60.0905, 29.9578 ], [ 60.1001, 29.9770 ], [ 60.1179, 29.9688 ], [ 60.1398, 29.9880 ], [ 60.1521, 29.9715 ], [ 60.1371, 30.0594 ], [ 60.1371, 30.0759 ], [ 60.1247, 30.1308 ], [ 60.1302, 30.1473 ], [ 60.1193, 30.1858 ], [ 60.1152, 30.2407 ], [ 60.1069, 30.2462 ], [ 60.1124, 30.2682 ], [ 60.1261, 30.2599 ], [ 60.1412, 30.2599 ], [ 60.1562, 30.2792 ], [ 60.1631, 30.3121 ], [ 60.1795, 30.3561 ], [ 60.1781, 30.3890 ], [ 60.1617, 30.4440 ], [ 60.1562, 30.4687 ], [ 60.1480, 30.4824 ], [ 60.1494, 30.5071 ], [ 60.1426, 30.5319 ], [ 60.1302, 30.5209 ], [ 60.0369, 30.6390 ], [ 60.0246, 30.6500 ], [ 60.0122, 30.6664 ], [ 59.9915, 30.6609 ], [ 59.9723, 30.6500 ], [ 59.9558, 30.6609 ], [ 59.9337, 30.6609 ], [ 59.8992, 30.6774 ], [ 59.8840, 30.6939 ], [ 59.8274, 30.7488 ], [ 59.7956, 30.7626 ], [ 59.7610, 30.7516 ], [ 59.7416, 30.6994 ], [ 59.7208, 30.6033 ], [ 59.7013, 30.5923 ], [ 59.6930, 30.5511 ], [ 59.6874, 30.4302 ], [ 59.6916, 30.2517 ], [ 59.7138, 30.0759 ], [ 59.7277, 30.0567 ], [ 59.7707, 30.0814 ], [ 59.8025, 30.1281 ], [ 59.8136, 30.1006 ], [ 59.8108, 30.0073 ], [ 59.8205, 29.9770 ], [ 59.8080, 29.9276 ], [ 59.8122, 29.8452 ], [ 59.8260, 29.8177 ], [ 59.8578, 29.8013 ], [ 59.8689, 29.7683 ], [ 59.8716, 29.7271 ], [ 59.8868, 29.6667 ], [ 59.9130, 29.6557 ], [ 59.9296, 29.6694 ], [ 59.9681, 29.6804 ], [ 60.0026, 29.6969 ], [ 60.0204, 29.7326 ] ] 
+            ], {
+                // Описываем свойства геообъекта.
+                // Содержимое балуна.
+                hintContent: "Зона 4"
+            }, {
+                // Задаем опции геообъекта.
+                // Цвет заливки.
+                fillColor: '#8B94CF',
+                // Цвет обводки.
+                strokeColor: '#8B8989',
+                // Общая прозрачность (как для заливки, так и для обводки).
+                opacity: 0.3,
+                // Ширина обводки.
+                strokeWidth: 4,
+                // Будет прозрачная
+                interactivityModel: 'default#transparent'
+            });
+        // Если мы не хотим, чтобы контур был виден, зададим соответствующую опцию.
+        cityPolygon.options.set('visible', true);
+
+ // Вся Ленинградская область
+var oblPolygon = new ymaps.Polygon(
+    [ [ [ 60.5184, 27.8017 ], [ 60.7719, 28.2082 ], [ 60.9488, 28.5049 ], [ 60.9434, 28.6147 ], [ 61.1246, 28.8235 ], [ 61.3100, 29.3398 ], [ 61.4839, 29.5925 ], [ 61.7454, 30.0100 ], [ 62.0512, 30.4604 ], [ 62.2926, 30.8669 ], [ 62.2721, 34.3166 ], [ 61.9065, 34.7012 ], [ 61.7818, 34.4375 ], [ 61.5678, 34.8879 ], [ 61.3839, 35.5142 ], [ 61.0821, 35.7339 ], [ 60.9434, 35.5361 ], [ 60.9861, 35.9975 ], [ 61.0980, 36.1074 ], [ 60.9648, 36.7996 ], [ 60.8095, 37.2829 ], [ 60.8417, 37.7444 ], [ 60.6157, 38.0740 ], [ 60.3501, 38.0080 ], [ 60.1809, 38.6123 ], [ 59.9447, 38.7222 ], [ 59.6624, 39.3813 ], [ 59.3721, 39.8208 ], [ 59.2992, 40.0954 ], [ 59.1810, 40.1504 ], [ 58.4573, 40.5349 ], [ 58.4976, 41.6885 ], [ 57.9703, 41.8313 ], [ 57.6124, 40.8645 ], [ 57.4588, 39.8428 ], [ 56.5355, 38.7331 ], [ 56.5051, 36.3711 ], [ 56.0958, 34.2617 ], [ 55.8865, 29.8672 ], [ 56.0159, 29.3618 ], [ 56.0958, 28.8784 ], [ 56.1756, 28.2412 ], [ 56.6264, 28.1533 ], [ 56.9580, 27.8347 ], [ 57.2926, 27.9336 ], [ 57.4647, 27.5820 ], [ 57.5593, 27.5710 ], [ 57.5593, 27.4062 ], [ 57.6890, 27.4722 ], [ 57.7947, 27.5710 ], [ 57.8241, 27.8017 ], [ 58.1508, 27.6370 ], [ 58.2841, 27.5600 ], [ 58.5206, 27.8567 ], [ 58.9490, 27.6919 ], [ 59.2373, 27.9226 ], [ 59.3553, 28.1973 ], [ 59.4785, 27.9665 ], [ 59.7457, 27.9995 ], [ 60.5184, 27.8017 ] ] ],
+            {
+                // Описываем свойства геообъекта.
+                // Содержимое балуна.
+                hintContent: "Зона 5"
+            },{
+                // Опции.
+                // Цвет границ (синий)
+                strokeColor: '#CC3399',
+                // Прозрачность (полупрозрачная заливка)
+                opacity: 0,
+                // Ширина линии
+                strokeWidth: 5,
+                // Стиль линии
+                strokeStyle: 'shortdash',
+                // Будет прозрачная
+                interactivityModel: 'default#transparent'
+            }
+        );
+        // Если мы не хотим, чтобы контур был виден, зададим соответствующую опцию.
+        oblPolygon.options.set('visible', true);
+
+        // Добавляем объекты
+        map.geoObjects.add(oblPolygon);
+        map.oblPolygon = oblPolygon;
+        map.geoObjects.add(cityPolygon);
+        map.cityPolygon = cityPolygon;
+        map.geoObjects.add(Zona3);
+        map.geoObjects.add(Zona2);                
+        map.geoObjects.add(Zona1);
+
+        var calculator = new DeliveryCalculator(map, center, cityPolygon, oblPolygon, Zona1, Zona2, Zona3);
+
+        var search = new ymaps.control.SearchControl({
+            useMapBounds : true,
+            noCentering : true,
+            noPlacemark : true
+        });
+        map.controls.add(search, { right: 5, top: 5 });
+        map.controls.add('smallZoomControl');
+        
+        search.events.add("resultselect", function (e) {
+            var results = search.getResultsArray(),
+                selected = e.get('resultIndex'),
+                point = results[selected].geometry.getCoordinates();
+
+            map.events.fire('click', new ymaps.Event({ coordPosition : point }));
+        });
+
+        //(calculator);    
+});
+
+
+function DeliveryCalculator(map,finish,cityPolygon,oblPolygon,Zona1,Zona2,Zona3) {
+
+    this._cityPolygon = cityPolygon;
+    this._oblPolygon = oblPolygon;
+    this._Zona1 = Zona1;
+    this._Zona2 = Zona2;
+    this._Zona3 = Zona3;
+    this._map = map;
+    this._start = null;
+
+    this._finish = new ymaps.Placemark(finish, { iconContent: "Софийская д.8" }, {
+            preset: 'twirl#redStretchyIcon',
+            draggable: false
+        }
+    );
+    this._finish.events.add('dragend', this._onStartChanged, this);
+    this._route = null;
+
+    map.events.add('click', this._onStartChanged, this);
+    map.geoObjects.add(this._finish);
+}
+
+var ptp = DeliveryCalculator.prototype;
+
+ptp._onStartChanged = function (e) {
+    var position = e.get('coordPosition');
+
+    if(this._start) {
+        position && this._start.geometry.setCoordinates(position);
+    } else {
+        this._start = new ymaps.Placemark(position, { iconContent: "Адрес доставки" }, { preset: 'twirl#redStretchyIcon', draggable : true });
+        this._start.events.add('dragend', this._onStartChanged, this);
+        this._map.geoObjects.add(this._start);
+    }
+    this.getDirections();
+};
+
+//ptp._processOnPosition= function (){
+//    this.getDirections();
+//};
+
+ptp.getDirections = function () {
+    var self = this,
+        start = this._start.geometry.getCoordinates(),
+        finish = this._finish.geometry.getCoordinates();
+
+    this._route && this._map.geoObjects.remove(this._route);
+    ymaps.geocode(start)
+        .then(function (geocode) {
+            var address = geocode.geoObjects.get(0) && geocode.geoObjects.get(0).properties.get("balloonContentBody") || "";
+
+            var myGeocoder = ymaps.geocode(finish);
+            myGeocoder.then(
+                function (res) {
+                    STARTADRESS = res.geoObjects.get(0) && res.geoObjects.get(0).properties.get("balloonContentBody") || "";
+
+                }
+            );
+
+
+            ymaps.route([start, finish])
+                .then(function (router) {
+
+                    var distance = Math.round(router.getLength() / 1000);
+                    //console.clear();
+                    //console.log("Всего: " + distance + " км");
+
+
+                    LASTADRESS  = address;
+                    LASTKM = distance;
+                    DISTANCE_FROM_TOWN  = Math.round( self._Zona2.geometry.getClosest(start).distance /1000);
+                    //console.log("old до Зоны2: " + DISTANCE_FROM_TOWN);
+
+
+                // !!!!!!!!! Расчет растояния за пределами СПб
+                // Объединим в выборку все сегменты маршрута.
+                var pathsObjects = ymaps.geoQuery(router.getPaths()),
+                    edges = [];
+                    
+                // Переберем все сегменты и разобьем их на отрезки.
+                pathsObjects.each(function (path) {
+                    var coordinates = path.geometry.getCoordinates();
+                    for (var i = 1, l = coordinates.length; i < l; i++) {
+                        edges.push({
+                            type: 'LineString',
+                            coordinates: [coordinates[i], coordinates[i - 1]]
+                        });
+                    }
+                });
+                
+                // Создадим новую выборку, содержащую:
+                // - отрезки, описываюшие маршрут;
+                // - начальную и конечную точки;
+                // - промежуточные точки.
+                var routeObjects = ymaps.geoQuery(edges)
+                        //.add(router.getWayPoints())
+                        //.add(router.getViaPoints())
+                        //.setOptions('strokeWidth', 3)
+                        .addToMap(self._map),
+                    // Найдем все объекты, попадающие внутрь СПб.
+                        objectsInSpb = routeObjects.searchInside(self._Zona2),
+                    // Найдем объекты, пересекающие МКАД.
+                        boundaryObjects = routeObjects.searchIntersect(self._Zona2);
+
+                // Раскрасим в разные цвета объекты внутри, снаружи и пересекающие СПб.
+                objectsInSpb.setOptions({
+                    strokeColor: '#ff0000',
+                });
+                
+                
+                var edges_out = [];
+                var dist = 0;
+                
+                // Объекты за пределами СПб получим исключением полученных выборок из
+                // исходной.
+                routeObjects.remove(objectsInSpb).remove(boundaryObjects).each(function (path) {
+                    var coordinates = path.geometry.getCoordinates();
+
+                    for (var i = 1, l = coordinates.length; i < l; i++) {
+                        edges_out.push([coordinates[i], coordinates[i - 1]]);
+                        
+                        dist += self._map.options.get('projection').getCoordSystem().getDistance(coordinates[i - 1], coordinates[i]);
+                        //console.log(dist);
+                    }
+                });
+                
+                //console.log("Вне границы: " + Math.round(dist / 1000) + " км.");
+                DISTANCE_FROM_TOWN=Math.round(dist / 1000);
+                routeObjects.removeFromMap(self._map);
+
+                    var cost, zona;
+
+                    if(self._Zona1.geometry.contains(start)){
+                        TYPE_DELIVERY_COST = 0;
+                        TYPE_TRANSPORT = 0;
+                        cost =  price[0][TYPE_TRANSPORT];
+                        LASTPRICE = cost;
+                        ZONA = 1;
+                    } 
+
+                    if(self._Zona2.geometry.contains(start)){
+                        TYPE_DELIVERY_COST = 0;
+                        TYPE_TRANSPORT = 0;
+                        cost =  price[1][TYPE_TRANSPORT];
+                        LASTPRICE = cost;
+                        ZONA = 2;
+                    }
+
+                    if(self._Zona3.geometry.contains(start)){
+                        TYPE_DELIVERY_COST = 0;
+                        TYPE_TRANSPORT = 0;
+                        cost =  price[2][TYPE_TRANSPORT];
+                        LASTPRICE = cost;
+                        ZONA = 3;
+                    }
+
+                    if(self._cityPolygon.geometry.contains(start) && !self._Zona1.geometry.contains(start) && !self._Zona2.geometry.contains(start) && !self._Zona3.geometry.contains(start)){
+                        TYPE_DELIVERY_COST = 0;
+                        TYPE_TRANSPORT = 0;
+                        cost =  price[3][TYPE_TRANSPORT];
+                        LASTPRICE = cost;
+                        ZONA = 4;
+                    }
+
+
+                    if(self._oblPolygon.geometry.contains(start) && !self._Zona1.geometry.contains(start) && !self._Zona2.geometry.contains(start) && !self._Zona3.geometry.contains(start) && !self._cityPolygon.geometry.contains(start)){
+                        TYPE_DELIVERY_COST = 1;
+                        TYPE_TRANSPORT = 0;
+                        //console.log(DISTANCE_FROM_TOWN);
+                        //console.log(price[3][0]);
+                        //console.log(price[4][0]);
+                        cost = price[1][0] + ( DISTANCE_FROM_TOWN * price[4][0] );
+                        LASTPRICE = cost;
+                        ZONA = 5;
+                    }
+
+                    self._route = router.getPaths();
+                    self._route.options.set({ strokeWidth: 5, strokeColor: '0000ffff', opacity: 0.5 });
+                    self._map.geoObjects.add(self._route);
+
+                    ptp.showresult(LASTKM,LASTPRICE,LASTADRESS,ZONA);
+
+                });
+        });
+};
+
+ptp.showresult = function(dist,price_res,adress,zona){
+
+    if (TYPE_DELIVERY_COST == 0){
+        var mess =  adress;
+        mess += 'Зона доставки: '+zona +'<br>';
+        mess += 'Расстояние: '+dist+' км. <br>';
+        mess += 'Стоимость доставки: '+price_res+' р.';
+
+    } else  if (TYPE_DELIVERY_COST == 1){
+        mess =  adress;
+        mess += 'Зона доставки: '+zona +'<br>';
+        mess += 'Расстояние: '+dist+' км. <br>';
+        mess += 'За пределами 2 зоны: '+DISTANCE_FROM_TOWN+' км. <br>';
+        var cost_km;
+        cost_km = price[4][0]*DISTANCE_FROM_TOWN;
+
+        mess += 'Расчет стоимости в 5 зоне: '+price[1][0] +' р + ' + cost_km +'р ('+price[4][0]+' р * '+DISTANCE_FROM_TOWN+' км) <br>';
+        mess += '<br> Итоговая стоимость доставки: '+price_res+' р. ';
+    } 
+
+    cost.innerHTML = mess;
+
+};
+
+ </script>
+ </div>
+</div>
+
+</body>
+</html>
